@@ -27,7 +27,7 @@ add_library(demo::lib ALIAS lib)
 
 # Setup OpenMP
 find_package(OpenMP 4.0 REQUIRED COMPONENTS CXX)
-target_link_libraries(lib PRIVATE OpenMP::OpenMP_CXX)
+target_link_libraries(lib PUBLIC OpenMP::OpenMP_CXX)
 
 # Setup our include directory
 target_include_directories(lib PUBLIC
@@ -49,9 +49,23 @@ set(CATCH_INSTALL_HELPERS OFF)
 set(CATCH_BUILD_TESTING OFF)
 set(CATCH_INSTALL_DOCS OFF)
 FetchContent_Declare(Catch2 URL
-    https://github.com/catchorg/Catch2/archive/v2.9.2.zip)
+    https://github.com/catchorg/Catch2/archive/v2.10.2.zip)
 FetchContent_MakeAvailable(Catch2)
 
+file(GLOB test-sources CONFIGURE_DEPENDS tests/*.cxx)
+add_executable(${PROJECT_NAME}-tests "${test-sources}")
+target_compile_definitions(${PROJECT_NAME}-tests
+  PRIVATE
+   CATCH_CONFIG_ENABLE_BENCHMARKING
+  )
+target_link_libraries(${PROJECT_NAME}-tests
+  PRIVATE
+    Catch2::Catch2
+    demo::lib
+  )
+
+include(${Catch2_SOURCE_DIR}/contrib/Catch.cmake)
+catch_discover_tests(${PROJECT_NAME}-tests)
 
 ###### Install Logic
 install(TARGETS lib
