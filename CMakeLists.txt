@@ -3,7 +3,8 @@ project(OpenMPIntelDemo
   HOMEPAGE_URL https://github.com/robertmaynard/cmake_openmp_demo
   DESCRIPTION "Showcase CMake+OpenMP with Intel compiler"
   VERSION 0.1.0
-  LANGUAGES CXX)
+  LANGUAGES CXX
+  )
 
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
@@ -70,9 +71,16 @@ catch_discover_tests(${PROJECT_NAME}-tests)
 ###### Install Logic
 install(TARGETS lib
   EXPORT ${PROJECT_NAME}-targets
-  INCLUDES DESTINATION "${CMAKE_INSTALL_DATADIR}")
+  INCLUDES DESTINATION "include/demo"
+  )
 
 install(EXPORT ${PROJECT_NAME}-targets
   DESTINATION "${CMAKE_INSTALL_DATADIR}/cmake/${PROJECT_NAME}"
   NAMESPACE demo::
-  FILE "${PROJECT_NAME}-targets.cmake")
+  FILE "${PROJECT_NAME}-targets.cmake"
+  )
+
+install(FILES
+  ${PROJECT_SOURCE_DIR}/demo/lib.h
+  DESTINATION "include/demo"
+  )
