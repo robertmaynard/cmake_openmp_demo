@@ -11,9 +11,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+    - name: download
+      uses: wei/wget@v1
+      with:
+        args: -O cmake-3.15.1-Linux-x86_64.sh https://github.com/Kitware/CMake/releases/download/v3.15.1/cmake-3.15.1-Linux-x86_64.sh
     - name: setup
       run: |
-        wget https://github.com/Kitware/CMake/releases/download/v3.15.1/cmake-3.15.1-Linux-x86_64.sh
         chmod +x cmake-3.15.1-Linux-x86_64.sh
         ./cmake-3.15.1-Linux-x86_64.sh --skip-license --prefix=${HOME}/cmake
       working-directory: ${HOME}/cache/
