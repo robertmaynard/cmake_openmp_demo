@@ -11,16 +11,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: test
-      run: echo "hello" 
     - name: dl
-      run: curl https://cmake.org/files/v3.15/cmake-3.15.5-Linux-x86_64.sh  --output ${HOME}/cmake-3.15.5-Linux-x86_64.sh
+      run: wget https://github.com/Kitware/CMake/releases/download/v3.15.1/cmake-3.15.1-Linux-x86_64.sh  -O ${HOME}/cmake-3.15.5-Linux-x86_64.sh
     - name: exec
       run: chmod +x ${HOME}/cmake-3.15.5-Linux-x86_64.sh
     - name: install_cmake
       run: ${HOME}/cmake-3.15.5-Linux-x86_64.sh --skip-license --prefix=${HOME}
     - name: setup
-      run: ${HOME}/bin/cmake -S . -B./build
+      run: ${HOME}/bin/cmake -S . -B./build -DCMAKE_BUILD_TYPE=Release
     - name: build
       run: ${HOME}/bin/cmake --build ./build -j2
     - name: test
