@@ -1,32 +1,11 @@
-# Prerequisites
-*.d
+# Visual Studio work directory
+.vs/
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+# Visual Studio Code
+.vscode/
 
-# Precompiled Headers
-*.gch
-*.pch
+# Exclude MacOS Finder files.
+.DS_Store
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
+# In source builds
+build/
