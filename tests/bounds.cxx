@@ -29,7 +29,7 @@ TEST_CASE("Benchmark min_max", "[demo.min_max.benchmark]") {
     values[i] = v;
   }
 
-  BENCHMARK("serial sum random vector") {
+  BENCHMARK("serial min_max random vector") {
     demo::bounds b = {3.0f, -3.0f};
     for (std::size_t i = 0; i < size; ++i) {
       b[0] = std::min(b[0], values[i]);
@@ -39,13 +39,13 @@ TEST_CASE("Benchmark min_max", "[demo.min_max.benchmark]") {
     REQUIRE(b[1] > 1.5f);
   };
 
-  BENCHMARK("openmp all cores sum random vector") {
+  BENCHMARK("openmp all cores min_max random vector") {
     demo::bounds min_max = demo::min_max(values);
     REQUIRE(min_max[0] < -1.5f);
     REQUIRE(min_max[1] > 1.5f);
   };
 
-  BENCHMARK("openmp 1 core sum random vector") {
+  BENCHMARK("openmp 1 core min_max random vector") {
     omp_set_num_threads(1);
     demo::bounds min_max = demo::min_max(values);
     REQUIRE(min_max[0] < -1.5f);
