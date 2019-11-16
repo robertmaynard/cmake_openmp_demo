@@ -8,8 +8,6 @@ project(OpenMPIntelDemo
   LANGUAGES CXX
   )
 
-include(CMakePackageConfigHelpers)
-include(GNUInstallDirs)
 include(FetchContent)
 include(CTest)
 
@@ -29,6 +27,12 @@ endif()
 add_library(lib STATIC demo/lib.cxx)
 add_library(demo::lib ALIAS lib)
 
+# Specify the installable headers of the lib. By specifying the headers
+# as PUBLIC_HEADER
+set_target_properties(lib PROPERTIES
+  PUBLIC_HEADER
+    demo/lib.h
+  )
 
 #### Properties of our library
 
@@ -55,6 +59,58 @@ target_compile_features(lib PUBLIC cxx_std_14)
 set_target_properties(lib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 
+### Setup the project to be installable / exportable / importable
+
+# CMake has the concept of an importable project. This means a project
+# that can be found using `find_package` without a custom FindProject being
+# written by the consumer. Instead the project to be found, exports itself.
+#
+# Exporting is primarily done by generating two files:
+#   <project_name>-targets.cmake which contains all the targets consumers can
+#   use
+#   <project_name>-config.cmake which is the primary entry point for cmake
+#   and contains any required `find_package` calls to use your project and
+#   includes <project_name>-targets.cmake.
+
+# Setup where our headers will be installed. We don't want to use the default
+# of `include` as that could cause our headers to overwrite existing files
+if(NOT DEFINED CMAKE_INSTALL_INCLUDEDIR)
+  set(CMAKE_INSTALL_INCLUDEDIR "include/demo")
+endif()
+
+include(CMakePackageConfigHelpers)
+include(GNUInstallDirs)
+
+# Configure the config.cmake file
+# processes the <project_name>-config.cmake template and place it in the build
+# directory so it doesn't pollute our source directory
+configure_package_config_file(
+  "${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME}-config.cmake.in"
+  "${PROJECT_BINARY_DIR}/share/cmake/${PROJECT_NAME}-config.cmake"
+  INSTALL_DESTINATION "share/cmake/${PROJECT_NAME}"
+  )
+
+# Add an install rule for the static library we built
+# `EXPORT` states that lib is part of the set of targets we want exported
+# to <project_name>-targets.cmake.
+install(TARGETS lib EXPORT ${PROJECT_NAME}-targets)
+
+# Install all targets that are part of the export set in the
+# <project_name>-targets.cmake under the namespace 'demo'.
+install(EXPORT ${PROJECT_NAME}-targets
+  DESTINATION "${CMAKE_INSTALL_DATADIR}/cmake/${PROJECT_NAME}"
+  NAMESPACE demo::
+  FILE "${PROJECT_NAME}-targets.cmake"
+  )
+
+# Install the <project_name>-config.cmake file that we configured into
+# the build directory
+install(FILES
+  "${PROJECT_BINARY_DIR}/share/cmake/${PROJECT_NAME}-config.cmake"
+  DESTINATION "${CMAKE_INSTALL_DATADIR}/cmake/${PROJECT_NAME}"
+  )
+
+
 ### Add Tests
 
 # Setup Catch2 for Tests
@@ -62,6 +118,8 @@ if(BUILD_TESTING)
   # Use FetchContent to to download and make Catch2 part of our CMake build.
   set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
   set(CATCH_INSTALL_HELPERS OFF)
+  set(CATCH_BUILD_EXAMPLES OFF)
+  set(CATCH_BUILD_EXTRA_TESTS OFF)
   set(CATCH_BUILD_TESTING OFF)
   set(CATCH_INSTALL_DOCS OFF)
   FetchContent_Declare(Catch2 URL
@@ -92,51 +150,3 @@ if(BUILD_TESTING)
   include(${Catch2_SOURCE_DIR}/contrib/Catch.cmake)
   catch_discover_tests(${PROJECT_NAME}-tests)
 endif()
-
-### Setup the project to be installable / exportable / importable
-
-# CMake has the concept of an importable project. This means a project
-# that can be found using `find_package` without a custom FindProject being
-# written by the consumer. Instead the project to be found, exports itself.
-#
-# Exporting is primarily done by generating two files:
-#   <project_name>-targets.cmake which contains all the targets consumers can
-#   use
-#   <project_name>-config.cmake which is the primary entry point for cmake
-#   and contains any required `find_package` calls to use your project and
-#   includes <project_name>-targets.cmake.
-
-# Install our headers
-install(FILES
-  ${PROJECT_SOURCE_DIR}/demo/lib.h
-  DESTINATION "include/demo"
-  )
-
-# Configure the config.cmake file
-# processes the <project_name>-config.cmake template and place it in the build
-# directory so it doesn't pollute our source directory
-configure_package_config_file(
-  "${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME}-config.cmake.in"
-  "${PROJECT_BINARY_DIR}/share/cmake/${PROJECT_NAME}-config.cmake"
-  INSTALL_DESTINATION "share/cmake/${PROJECT_NAME}"
-  )
-
-# Add an install rule for the static library we built
-# `EXPORT` states that lib is part of the set of targets we want exported
-# to <project_name>-targets.cmake.
-install(TARGETS lib EXPORT ${PROJECT_NAME}-targets)
-
-# Install all targets that are part of the export set in the
-# <project_name>-targets.cmake under the namespace 'demo'.
-install(EXPORT ${PROJECT_NAME}-targets
-  DESTINATION "${CMAKE_INSTALL_DATADIR}/cmake/${PROJECT_NAME}"
-  NAMESPACE demo::
-  FILE "${PROJECT_NAME}-targets.cmake"
-  )
-
-# Install the <project_name>-config.cmake file that we configured into
-# the build directory
-install(FILES
-  "${PROJECT_BINARY_DIR}/share/cmake/${PROJECT_NAME}-config.cmake"
-  DESTINATION "${CMAKE_INSTALL_DATADIR}/cmake/${PROJECT_NAME}"
-  )
