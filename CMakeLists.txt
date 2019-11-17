@@ -38,7 +38,7 @@ set_target_properties(lib PROPERTIES
 
 # Setup OpenMP
 find_package(OpenMP 4.0 REQUIRED COMPONENTS CXX)
-target_link_libraries(lib PRIVATE OpenMP::OpenMP_CXX)
+target_link_libraries(lib PUBLIC OpenMP::OpenMP_CXX)
 
 # Setup our include directory
 # The INSTALL_INTERFACE is what is evaluated when consumers build
